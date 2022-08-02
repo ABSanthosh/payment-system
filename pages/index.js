@@ -1,9 +1,6 @@
-import getStripe from "../Utils/getStripe";
 import Head from "next/head";
 import React from "react";
 import styles from "../styles/Home.module.css";
-import { fetchPostJSON } from "../Utils/api-helpers";
-import { formatAmountForStripe } from "../Utils/stripe-helpers";
 
 export default function Home() {
   const [events, setEvents] = React.useState([
@@ -21,35 +18,6 @@ export default function Home() {
         .reduce((acc, event) => acc + event.price, 0)
     );
   }, [events]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const checkoutSession = await fetchPostJSON("/api/checkout", {
-      amount: total,
-      line_items: events
-        .filter((e) => e.isSelected)
-        .map((e) => ({
-          name: e.name,
-          amount: formatAmountForStripe(e.price, "inr"),
-          currency: "inr",
-          quantity: 1,
-        })),
-    });
-    // console.log(JSON.parse(checkoutSession).id);
-
-    if (JSON.parse(checkoutSession).statusCode === 500) {
-      console.error(JSON.parse(checkoutSession).message);
-      return;
-    }
-
-    const stripe = await getStripe();
-    const { error, res } = await stripe.redirectToCheckout({
-      sessionId: JSON.parse(checkoutSession).id,
-    });
-
-    window.alert(error.message);
-    console.log(res);
-  };
 
   return (
     <div className={styles.container}>
@@ -107,7 +75,12 @@ export default function Home() {
                 {total}
               </h2>
             </div>
-            <form onSubmit={handleSubmit}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                console.log(total);
+              }}
+            >
               <button type="submit">Checkout</button>
             </form>
           </main>
