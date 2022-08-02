@@ -1,8 +1,56 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import getStripe from "../Utils/getStripe";
+import Head from "next/head";
+import React from "react";
+import styles from "../styles/Home.module.css";
+import { fetchPostJSON } from "../Utils/api-helpers";
+import { formatAmountForStripe } from "../Utils/stripe-helpers";
 
 export default function Home() {
+  const [events, setEvents] = React.useState([
+    { id: 110, name: "Football", price: 100, isSelected: false },
+    { id: 120, name: "Basketball", price: 200, isSelected: false },
+    { id: 130, name: "Tennis", price: 300, isSelected: false },
+    { id: 140, name: "Volleyball", price: 400, isSelected: false },
+  ]);
+  const [total, setTotal] = React.useState(0);
+
+  React.useEffect(() => {
+    setTotal(
+      events
+        .filter((e) => e.isSelected)
+        .reduce((acc, event) => acc + event.price, 0)
+    );
+  }, [events]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const checkoutSession = await fetchPostJSON("/api/checkout", {
+      amount: total,
+      line_items: events
+        .filter((e) => e.isSelected)
+        .map((e) => ({
+          name: e.name,
+          amount: formatAmountForStripe(e.price, "inr"),
+          currency: "inr",
+          quantity: 1,
+        })),
+    });
+    // console.log(JSON.parse(checkoutSession).id);
+
+    if (JSON.parse(checkoutSession).statusCode === 500) {
+      console.error(JSON.parse(checkoutSession).message);
+      return;
+    }
+
+    const stripe = await getStripe();
+    const { error, res } = await stripe.redirectToCheckout({
+      sessionId: JSON.parse(checkoutSession).id,
+    });
+
+    window.alert(error.message);
+    console.log(res);
+  };
+
   return (
     <div className={styles.container}>
       <Head>
@@ -11,59 +59,60 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+      <div className={styles.main}>
+        <h1 className={styles.title}>Welcome to Stripe payment Gateway!</h1>
+        <div className={styles.bottom}>
+          <aside>
+            {events.map((event, index) => (
+              <div
+                className={`${styles.card} ${
+                  event.isSelected ? styles.cardActive : ""
+                }`}
+                key={index}
+              >
+                <h2>
+                  {event.name} <p>₹{event.price}</p>
+                </h2>
+                <button
+                  className={`${event.isSelected ? styles.buttonActive : ""}`}
+                  onClick={() =>
+                    setEvents(
+                      events.map((e) =>
+                        e.id === event.id
+                          ? { ...e, isSelected: !e.isSelected }
+                          : e
+                      )
+                    )
+                  }
+                >
+                  {event.isSelected ? "Remove" : "Add"}
+                </button>
+              </div>
+            ))}
+          </aside>
+          <main className={styles.formContainer}>
+            <div className={styles.cart}>
+              <h2>Cart</h2>
+              <ul>
+                {events
+                  .filter((e) => e.isSelected)
+                  .map((event, index) => (
+                    <li key={index}>
+                      {event.name} - {event.price}
+                    </li>
+                  ))}
+              </ul>
+              <h2>
+                Total:{" ₹"}
+                {total}
+              </h2>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <button type="submit">Checkout</button>
+            </form>
+          </main>
         </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+      </div>
     </div>
-  )
+  );
 }
