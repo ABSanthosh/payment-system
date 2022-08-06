@@ -1,6 +1,7 @@
 import Head from "next/head";
 import React from "react";
 import styles from "../styles/Home.module.css";
+import initializeRazorpay from "../utils/initRazorpay";
 
 export default function Home() {
   const [events, setEvents] = React.useState([
@@ -18,6 +19,37 @@ export default function Home() {
         .reduce((acc, event) => acc + event.price, 0)
     );
   }, [events]);
+
+  async function makePayment() {
+    const totalInPaise = total * 100;
+    const res = await initializeRazorpay();
+    if (!res) {
+      console.log("Razorpay not initialized");
+      return;
+    }
+
+    const data = await fetch("/api/razorpay", {
+      method: "POST",
+      body: JSON.stringify({
+        amount: totalInPaise,
+      }),
+    }).then((res) => res.json());
+
+    const options = {
+      key: process.env.RAZORPAY_KEY_ID,
+      name: "Santhosh",
+      currency: data.currency,
+      amount: data.amount,
+      order_id: data.id,
+      description: "Payment for events",
+      handler: function (response) {
+        console.log(response);
+      },
+    };
+
+    const payment = new window.Razorpay(options);
+    payment.open();
+  }
 
   return (
     <div className={styles.container}>
@@ -76,9 +108,9 @@ export default function Home() {
               </h2>
             </div>
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                console.log(total);
+                await makePayment();
               }}
             >
               <button type="submit">Checkout</button>
