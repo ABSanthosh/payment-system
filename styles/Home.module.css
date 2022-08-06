@@ -1,95 +1,51 @@
-.container {
-  padding: 0 2rem;
+
+.Home{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: aliceblue;
 }
 
-.main {
-  min-height: 100vh;
-  padding: 1rem 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
+.Home form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 350px;
+    background-color: white;
+    border-radius: 5px;
+    padding: 20px;
+    gap: 20px;
 }
 
-.bottom {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: row;
+.Home form label{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
 }
 
-.card {
-  margin: 1rem;
-  padding: 1.5rem;
-  text-align: left;
-  color: inherit;
-  text-decoration: none;
-  border: 1px solid #eaeaea;
-  border-radius: 10px;
-  transition: color 0.15s ease, border-color 0.15s ease;
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.Home form input{
+    width: 100%;
+    height: 40px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 0 10px;
 }
 
-.cardActive {
-  color: #0070f3;
-  border-color: #0070f3;
-}
-
-.card h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  display: inline-flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.card button{
-  border: 1px solid #eaeaea;
-  border-radius: 7px;
-  height: 35px;
-  cursor: pointer;
-}
-
-.buttonActive{
-  background-color: #f32400;
-  color: white;
-}
-
-.card p {
-  margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.5;
-  width: fit-content;
-}
-
-.cart{
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.cart h2{
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.formContainer{
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  gap: 30px;
-}
-
-.formContainer button{
-  border: 1px solid #eaeaea;
-  border-radius: 7px;
-  height: 45px;
-  cursor: pointer;
+.Home form label button{
+    width: 100%;
+    height: 40px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #4caf50;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
 }

@@ -14,10 +14,13 @@ export default async function paymentHandler(req, res) {
     currency: "INR",
     receipt: shortid.generate(),
     payment_capture: 1,
+    notes: JSON.parse(req.body).notes,
   };
 
+  console.log(JSON.parse(req.body).notes);
   try {
     const response = await razorpay.orders.create(options);
+    console.log(response);
     res.status(200).json({
       id: response.id,
       currency: response.currency,
